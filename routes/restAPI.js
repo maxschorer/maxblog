@@ -9,7 +9,6 @@ client.connect();
 
 exports.findMostByWC = function(req, res){
     var num = req.params.num || NUM_RESULTS;
-    //var numEpisodesQuery = "SELECT COUNT(*) FROM episodes WHERE air_date <= CURRENT_DATE;";
     var queryString = fs.readFileSync('routes/findMostByWC.sql').toString();
     queryString += num + ';';
     console.log(queryString);
@@ -17,7 +16,13 @@ exports.findMostByWC = function(req, res){
     client.query(queryString, function (err, result) {
 	var output = result.rows;
 	for (var i = 0; i < output.length; i++){
-	    output[i]['words_by_ep'] = output[i]['words_by_ep'].split(',');
+	    var wordsByEpNum = [];
+	    var wordsByEpStr = output[i]['words_by_ep'].split(',');
+	    for (var j = 0; j < wordsByEpStr.length; j++){
+		wordsByEpNum.push(parseInt(wordsByEpStr[j]));
+	    }
+
+	    output[i]['words_by_ep'] = wordsByEpNum;
 	}
 	res.json(output, headers={ 'Content-Type': 'application/json' }, status=200);
     });
