@@ -1,11 +1,18 @@
 SELECT
-  *
-FROM
+  t2.name,
+  array_to_string(array_agg(episode_words ORDER BY season_num, episode_num), ',') AS raw_cnt_by_ep,
+  array_to_string(array_agg(mov_ave ORDER BY season_num, episode_num), ',') AS mov_ave_by_ep,
+  array_to_string(array_agg(avg_per_episode ORDER BY season_num, episode_num), ',') AS cumul_ave_by_ep
+FROM 
 (
 SELECT
   t.name,
-  SUM(episode_words) AS total_words,
-  array_to_string(array_agg(episode_words ORDER BY season_num, episode_num), ',') AS words_by_ep
+  t.season_num,
+  t.episode_num,
+  t.episode_words,
+  ROUND(AVG(t.episode_words) OVER (PARTITION BY t.name ORDER BY t.season_num, t.episode_num ROWS BETWEEN 2 PRECEDING AND 0 PRECEDING)) AS mov_ave,
+  ROUND(AVG(t.episode_words) OVER (PARTITION BY t.name ORDER BY t.season_num, t.episode_num)) AS avg_per_episode
+
 FROM (
 SELECT
   c.name,
@@ -21,7 +28,7 @@ FROM characters c
 GROUP BY c.name, s.num, e.num
 ORDER BY s.num, e.num
 ) t
-GROUP BY t.name
-ORDER BY SUM(episode_words) DESC
 ) t2
-LIMIT  
+GROUP BY t2.name
+ORDER BY SUM(t2.episode_words) DESC
+LIMIT 

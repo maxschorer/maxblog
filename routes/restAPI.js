@@ -16,13 +16,21 @@ exports.findMostByWC = function(req, res){
     client.query(queryString, function (err, result) {
 	var output = result.rows;
 	for (var i = 0; i < output.length; i++){
-	    var wordsByEpNum = [];
-	    var wordsByEpStr = output[i]['words_by_ep'].split(',');
-	    for (var j = 0; j < wordsByEpStr.length; j++){
-		wordsByEpNum.push(parseInt(wordsByEpStr[j]));
+	    var rawCntByEpNum = [];
+	    var movAveByEpNum = [];
+	    var cumulAveByEpNum = [];
+	    var rawCntByEpStr = output[i]['raw_cnt_by_ep'].split(',');
+	    var movAveByEpStr = output[i]['mov_ave_by_ep'].split(',');
+	    var cumulAveByEpStr = output[i]['cumul_ave_by_ep'].split(',');
+	    for (var j = 0; j < rawCntByEpStr.length; j++){
+		rawCntByEpNum.push(parseInt(rawCntByEpStr[j]));
+		movAveByEpNum.push(parseInt(movAveByEpStr[j]));
+		cumulAveByEpNum.push(parseInt(cumulAveByEpStr[j]));
 	    }
 
-	    output[i]['words_by_ep'] = wordsByEpNum;
+	    output[i]['raw_cnt_by_ep'] = rawCntByEpNum;
+	    output[i]['mov_ave_by_ep'] = movAveByEpNum;
+	    output[i]['cumul_ave_by_ep'] = cumulAveByEpNum;
 	}
 	res.json(output, headers={ 'Content-Type': 'application/json' }, status=200);
     });
